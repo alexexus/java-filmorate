@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +36,7 @@ public class UserController {
         checkException(user);
         user.setId(++generatorId);
         users.put(user.getId(), user);
-        log.trace("Добавлен новый пользователь {}", user);
+        log.debug("Added new user {}", user);
         return user;
     }
 
@@ -47,7 +47,7 @@ public class UserController {
         users.get(user.getId()).setEmail(user.getEmail());
         users.get(user.getId()).setName(user.getName());
         users.get(user.getId()).setLogin(user.getLogin());
-        log.trace("Пользователь {} обновлен", user);
+        log.debug("User {} updated", user);
         return user;
     }
 
@@ -56,16 +56,16 @@ public class UserController {
             user.setName(user.getLogin());
         }
         if (user.getEmail().isEmpty() || !(user.getEmail().contains("@"))) {
-            log.error("Электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+            log.error("Email cannot be empty and must contain the @ symbol");
+            throw new ValidationException("Email cannot be empty and must contain the @ symbol");
         }
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.error("Логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+            log.error("Login cannot be empty and contain spaces");
+            throw new ValidationException("Login cannot be empty and contain spaces");
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Дата рождения не может быть в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем");
+            log.error("Date of birth cannot be in the future");
+            throw new ValidationException("Date of birth cannot be in the future");
         }
     }
 

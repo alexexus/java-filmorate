@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +36,7 @@ public class FilmController {
         checkException(film);
         film.setId(++generatorId);
         films.put(film.getId(), film);
-        log.trace("Добавлен новый фильм {}", film);
+        log.debug("Added new movie {}", film);
         return film;
     }
 
@@ -47,26 +47,22 @@ public class FilmController {
         films.get(film.getId()).setDuration(film.getDuration());
         films.get(film.getId()).setName(film.getName());
         films.get(film.getId()).setReleaseDate(film.getReleaseDate());
-        log.trace("Фильм {} обновлен", film);
+        log.debug("Movie {} updated", film);
         return film;
     }
 
     private void checkException(@Valid @RequestBody Film film) {
         if (film.getName().isEmpty()) {
-            log.error("Название не может быть пустым");
-            throw new ValidationException("Название не может быть пустым");
+            log.error("Title cannot be empty");
+            throw new ValidationException("Title cannot be empty");
         }
         if (film.getDescription().length() > 200) {
-            log.error("Максимальная длина описания — 200 символов");
-            throw new ValidationException("Максимальная длина описания — 200 символов");
+            log.error("The maximum description length is 200 characters");
+            throw new ValidationException("The maximum description length is 200 characters");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Дата релиза — не раньше 28 декабря 1895 года");
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-        if (film.getDuration() < 0) {
-            log.error("Продолжительность фильма должна быть положительной");
-            throw new ValidationException("Продолжительность фильма должна быть положительной");
+            log.error("Release date - no earlier than December 28, 1895");
+            throw new ValidationException("Release date - no earlier than December 28, 1895");
         }
     }
 
