@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class UserController {
 
     @PostMapping("/users")
     public User addFilm(@Valid @RequestBody User user) {
-        checkException(user);
+        validate(user);
         user.setId(++generatorId);
         users.put(user.getId(), user);
         log.debug("Added new user {}", user);
@@ -42,22 +42,19 @@ public class UserController {
 
     @PutMapping("/users")
     public User updateFilm(@Valid @RequestBody User user) {
-        checkException(user);
-        users.get(user.getId()).setBirthday(user.getBirthday());
-        users.get(user.getId()).setEmail(user.getEmail());
-        users.get(user.getId()).setName(user.getName());
-        users.get(user.getId()).setLogin(user.getLogin());
+        validate(user);
+        User userToUpdate = users.get(user.getId());
+        userToUpdate.setBirthday(user.getBirthday());
+        userToUpdate.setEmail(user.getEmail());
+        userToUpdate.setName(user.getName());
+        userToUpdate.setLogin(user.getLogin());
         log.debug("User {} updated", user);
         return user;
     }
 
-    private void checkException(@RequestBody User user) {
+    private void validate(User user) {
         if (user.getName() == null) {
             user.setName(user.getLogin());
-        }
-        if (user.getEmail().isEmpty() || !(user.getEmail().contains("@"))) {
-            log.error("Email cannot be empty and must contain the @ symbol");
-            throw new ValidationException("Email cannot be empty and must contain the @ symbol");
         }
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             log.error("Login cannot be empty and contain spaces");
