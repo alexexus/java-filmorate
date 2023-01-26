@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +33,9 @@ public class UserController {
     @PostMapping("/users")
     public User addFilm(@Valid @RequestBody User user) {
         validate(user);
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         user.setId(++generatorId);
         users.put(user.getId(), user);
         log.debug("Added new user {}", user);
@@ -43,6 +45,9 @@ public class UserController {
     @PutMapping("/users")
     public User updateFilm(@Valid @RequestBody User user) {
         validate(user);
+        if (user.getName() == null) {
+            user.setName(user.getLogin());
+        }
         User userToUpdate = users.get(user.getId());
         userToUpdate.setBirthday(user.getBirthday());
         userToUpdate.setEmail(user.getEmail());
@@ -53,18 +58,9 @@ public class UserController {
     }
 
     private void validate(User user) {
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.error("Login cannot be empty and contain spaces");
-            throw new ValidationException("Login cannot be empty and contain spaces");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Date of birth cannot be in the future");
-            throw new ValidationException("Date of birth cannot be in the future");
+        if (user.getLogin().contains(" ")) {
+            log.error("Login cannot contain spaces");
+            throw new ValidationException("Login cannot contain spaces");
         }
     }
-
-
 }
