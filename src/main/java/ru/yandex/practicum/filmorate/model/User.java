@@ -6,12 +6,18 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Data
 public class User {
 
-    private int id;
+    @Positive
+    private Integer id;
+
+    private Set<Integer> friends = new TreeSet<>();
 
     @Email
     @NotNull
@@ -25,5 +31,6 @@ public class User {
     private String name;
 
     @Past
+    @NotNull
     private LocalDate birthday;
 }
