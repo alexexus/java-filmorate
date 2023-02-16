@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
@@ -27,44 +27,44 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping("/films")
+    @GetMapping
     public List<Film> getAllFilms() {
-        return filmService.filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
-    @PostMapping("/films")
+    @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        return filmService.filmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
-    @PutMapping("/films")
+    @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return filmService.filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
-    @GetMapping("/films/{id}")
+    @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Integer id) {
-        return filmService.filmStorage.getFilmById(id);
+        return filmService.getFilmById(id);
     }
 
-    @DeleteMapping("/films/{id}")
+    @DeleteMapping("/{id}")
     public void deleteFilm(@PathVariable Integer id) {
-        filmService.filmStorage.deleteFilm(id);
+        filmService.deleteFilm(id);
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Integer id,
                         @PathVariable Integer userId) {
         filmService.addLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping("/popular")
     public List<Film> getPopularFilms(
             @RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getPopularFilms(count);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable Integer id,
                            @PathVariable Integer userId) {
         filmService.deleteLike(id, userId);

@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -26,49 +26,49 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> getAllUsers() {
-        return userService.userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        return userService.userStorage.addUser(user);
+        return userService.addUser(user);
     }
 
-    @PutMapping("/users")
+    @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        return userService.userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public User getUser(@PathVariable Integer userId) {
-        return userService.userStorage.getUserById(userId);
+        return userService.getUserById(userId);
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Integer id) {
-        userService.userStorage.deleteUser(id);
+        userService.deleteUser(id);
     }
 
-    @GetMapping("/users/{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable Integer id,
                                        @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
-    @PutMapping("/users/{id}/friends/{otherId}")
+    @PutMapping("/{id}/friends/{otherId}")
     public void addFriend(@PathVariable Integer id,
                           @PathVariable Integer otherId) {
         userService.addFriend(id, otherId);
     }
 
-    @GetMapping("/users/{id}/friends")
+    @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable Integer id) {
         return userService.getAllFriends(id);
     }
 
-    @DeleteMapping("/users/{id}/friends/{otherId}")
+    @DeleteMapping("/{id}/friends/{otherId}")
     public void deleteFriend(@PathVariable Integer id,
                              @PathVariable Integer otherId) {
         userService.deleteFriend(id, otherId);
