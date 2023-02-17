@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,43 +26,33 @@ public class UserService {
     }
 
     public void addFriend(Integer id, Integer otherId) {
-        if (id > 0 && otherId > 0) {
-            userStorage.getUserById(id).getFriends().add(otherId);
-            userStorage.getUserById(otherId).getFriends().add(id);
-        } else {
+        if (userStorage.getUserById(id) == null || otherId <= 0) {
             throw new NotFoundException("Id's must be positive");
         }
+        userStorage.getUserById(id).getFriends().add(otherId);
+        userStorage.getUserById(otherId).getFriends().add(id);
     }
 
     public void deleteFriend(Integer id, Integer otherId) {
-        if (id > 0 && otherId > 0) {
-            userStorage.getUserById(id).getFriends().remove(otherId);
-            userStorage.getUserById(otherId).getFriends().remove(id);
-        } else {
+        if (userStorage.getUserById(id) == null || otherId <= 0) {
             throw new NotFoundException("Id's must be positive");
         }
+        userStorage.getUserById(id).getFriends().remove(otherId);
+        userStorage.getUserById(otherId).getFriends().remove(id);
     }
 
     public List<User> getAllFriends(Integer id) {
-        List<User> usersFriends = new ArrayList<>();
-        for (Integer i : userStorage.getUserById(id).getFriends()) {
-            usersFriends.add(userStorage.getUserById(i));
-        }
-        return usersFriends;
+        return userStorage.getUserById(id).getFriends().stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Integer id, Integer otherId) {
-        List<Integer> idUserFriends = new ArrayList<>(userStorage.getUserById(id).getFriends());
-        List<Integer> otherIdUserFriends = new ArrayList<>(userStorage.getUserById(otherId).getFriends());
-        List<User> commonFriends = new ArrayList<>();
-        for (Integer i : idUserFriends) {
-            for (Integer j : otherIdUserFriends) {
-                if (i.equals(j)) {
-                    commonFriends.add(userStorage.getUserById(i));
-                }
-            }
-        }
-        return commonFriends;
+        List<Integer> userFriends = new ArrayList<>(userStorage.getUserById(id).getFriends());
+        userFriends.retainAll(userStorage.getUserById(otherId).getFriends());
+        return userFriends.stream()
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 
     public User addUser(User user) {
@@ -75,33 +66,30 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        if (userStorage.getUserById(user.getId()) == null) {
+            throw new NotFoundException("Wrong id");
+        }
         validate(user);
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
-        if (userStorage.getUsers().containsKey(user.getId())) {
-            log.debug("User {} updated", user);
-            return userStorage.updateUser(user);
-        } else {
-            throw new NotFoundException("Wrong id");
-        }
+        log.debug("User {} updated", user);
+        return userStorage.updateUser(user);
     }
 
     public void deleteUser(Integer id) {
-        if (userStorage.getUsers().containsKey(id)) {
-            log.debug("User {} deleted", userStorage.getUsers().get(id));
-            userStorage.deleteUser(id);
-        } else {
+        if (userStorage.getUserById(id) == null) {
             throw new NotFoundException("Wrong id");
         }
+        log.debug("User {} deleted", userStorage.getUserById(id));
+        userStorage.deleteUser(id);
     }
 
     public User getUserById(Integer id) {
-        if (userStorage.getUsers().containsKey(id)) {
-            return userStorage.getUserById(id);
-        } else {
+        if (userStorage.getUserById(id) == null) {
             throw new NotFoundException("Wrong id");
         }
+        return userStorage.getUserById(id);
     }
 
     public List<User> getAllUsers() {
@@ -110,7 +98,6 @@ public class UserService {
 
     private void validate(User user) {
         if (user.getLogin().contains(" ")) {
-            log.error("Login cannot contain spaces");
             throw new ValidationException("Login cannot contain spaces");
         }
     }

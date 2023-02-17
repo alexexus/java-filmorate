@@ -32,17 +32,17 @@ public class ErrorHandler {
         log.error(e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
-}
 
-class ErrorResponse {
+    private static class ErrorResponse {
 
-    private final String error;
+        private final String error;
 
-    public ErrorResponse(String error) {
-        this.error = error;
-    }
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
 
-    public String getError() {
-        return error;
+        public String getError() {
+            return error;
+        }
     }
 }

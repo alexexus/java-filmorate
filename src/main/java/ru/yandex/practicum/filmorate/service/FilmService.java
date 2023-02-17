@@ -26,19 +26,17 @@ public class FilmService {
     }
 
     public void addLike(Integer id, Integer userId) {
-        if (id > 0 && userId > 0) {
-            filmStorage.getFilmById(id).getLikes().add(userId);
-        } else {
+        if (filmStorage.getFilmById(id) == null || userId <= 0) {
             throw new NotFoundException("Id's must be positive");
         }
+        filmStorage.getFilmById(id).getLikes().add(userId);
     }
 
     public void deleteLike(Integer id, Integer userId) {
-        if (id > 0 && userId > 0) {
-            filmStorage.getFilmById(id).getLikes().remove(userId);
-        } else {
+        if (filmStorage.getFilmById(id) == null || userId <= 0) {
             throw new NotFoundException("Id's must be positive");
         }
+        filmStorage.getFilmById(id).getLikes().remove(userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
@@ -60,35 +58,31 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        validate(film);
-        if (filmStorage.getFilms().containsKey(film.getId())) {
-            log.debug("Film {} updated", film);
-            return filmStorage.updateFilm(film);
-        } else {
+        if (filmStorage.getFilmById(film.getId()) == null) {
             throw new NotFoundException("Wrong id");
         }
+        validate(film);
+        log.debug("Film {} updated", film);
+        return filmStorage.updateFilm(film);
     }
 
     public void deleteFilm(Integer id) {
-        if (filmStorage.getFilms().containsKey(id)) {
-            log.debug("Film {} deleted", filmStorage.getFilms().get(id));
-            filmStorage.deleteFilm(id);
-        } else {
+        if (filmStorage.getFilmById(id) == null) {
             throw new NotFoundException("Wrong id");
         }
+        log.debug("Film {} deleted", filmStorage.getFilmById(id));
+        filmStorage.deleteFilm(id);
     }
 
     public Film getFilmById(Integer id) {
-        if (filmStorage.getFilms().containsKey(id)) {
-            return filmStorage.getFilmById(id);
-        } else {
+        if (filmStorage.getFilmById(id) == null) {
             throw new NotFoundException("Wrong id");
         }
+        return filmStorage.getFilmById(id);
     }
 
     private void validate(Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Release date - no earlier than December 28, 1895");
             throw new ValidationException("Release date - no earlier than December 28, 1895");
         }
     }
