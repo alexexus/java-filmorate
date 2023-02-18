@@ -26,30 +26,30 @@ public class UserService {
     }
 
     public void addFriend(Integer id, Integer otherId) {
-        if (userStorage.getUserById(id) == null || otherId <= 0) {
-            throw new NotFoundException("Id's must be positive");
+        if (userStorage.getUserById(otherId) == null) {
+            throw new NotFoundException("Wrong id");
         }
-        userStorage.getUserById(id).getFriends().add(otherId);
-        userStorage.getUserById(otherId).getFriends().add(id);
+        getUserById(id).getFriends().add(otherId);
+        getUserById(otherId).getFriends().add(id);
     }
 
     public void deleteFriend(Integer id, Integer otherId) {
-        if (userStorage.getUserById(id) == null || otherId <= 0) {
-            throw new NotFoundException("Id's must be positive");
+        if (userStorage.getUserById(otherId) == null) {
+            throw new NotFoundException("Wrong id");
         }
-        userStorage.getUserById(id).getFriends().remove(otherId);
-        userStorage.getUserById(otherId).getFriends().remove(id);
+        getUserById(id).getFriends().remove(otherId);
+        getUserById(otherId).getFriends().remove(id);
     }
 
     public List<User> getAllFriends(Integer id) {
-        return userStorage.getUserById(id).getFriends().stream()
+        return getUserById(id).getFriends().stream()
                 .map(this::getUserById)
                 .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(Integer id, Integer otherId) {
-        List<Integer> userFriends = new ArrayList<>(userStorage.getUserById(id).getFriends());
-        userFriends.retainAll(userStorage.getUserById(otherId).getFriends());
+        List<Integer> userFriends = new ArrayList<>(getUserById(id).getFriends());
+        userFriends.retainAll(getUserById(otherId).getFriends());
         return userFriends.stream()
                 .map(this::getUserById)
                 .collect(Collectors.toList());
@@ -78,18 +78,20 @@ public class UserService {
     }
 
     public void deleteUser(Integer id) {
-        if (userStorage.getUserById(id) == null) {
+        User userById = userStorage.getUserById(id);
+        if (userById == null) {
             throw new NotFoundException("Wrong id");
         }
-        log.debug("User {} deleted", userStorage.getUserById(id));
+        log.debug("User {} deleted", userById);
         userStorage.deleteUser(id);
     }
 
     public User getUserById(Integer id) {
-        if (userStorage.getUserById(id) == null) {
+        User userById = userStorage.getUserById(id);
+        if (userById == null) {
             throw new NotFoundException("Wrong id");
         }
-        return userStorage.getUserById(id);
+        return userById;
     }
 
     public List<User> getAllUsers() {

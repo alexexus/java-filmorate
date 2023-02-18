@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,28 +20,30 @@ public class FilmService {
     private int generatorId = 0;
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public void addLike(Integer id, Integer userId) {
-        if (filmStorage.getFilmById(id) == null || userId <= 0) {
-            throw new NotFoundException("Id's must be positive");
+        if (userStorage.getUserById(userId) == null) {
+            throw new NotFoundException("Wrong id");
         }
-        filmStorage.getFilmById(id).getLikes().add(userId);
+        getFilmById(id).getLikes().add(userId);
     }
 
     public void deleteLike(Integer id, Integer userId) {
-        if (filmStorage.getFilmById(id) == null || userId <= 0) {
-            throw new NotFoundException("Id's must be positive");
+        if (userStorage.getUserById(userId) == null) {
+            throw new NotFoundException("Wrong id");
         }
-        filmStorage.getFilmById(id).getLikes().remove(userId);
+        getFilmById(id).getLikes().remove(userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmStorage.getAllFilms().stream()
+        return getAllFilms().stream()
                 .sorted((o1, o2) -> o2.getLikes().size() - o1.getLikes().size())
                 .limit(count)
                 .collect(Collectors.toList());
@@ -67,18 +70,20 @@ public class FilmService {
     }
 
     public void deleteFilm(Integer id) {
-        if (filmStorage.getFilmById(id) == null) {
+        Film filmById = filmStorage.getFilmById(id);
+        if (filmById == null) {
             throw new NotFoundException("Wrong id");
         }
-        log.debug("Film {} deleted", filmStorage.getFilmById(id));
+        log.debug("Film {} deleted", filmById);
         filmStorage.deleteFilm(id);
     }
 
     public Film getFilmById(Integer id) {
-        if (filmStorage.getFilmById(id) == null) {
+        Film filmById = filmStorage.getFilmById(id);
+        if (filmById == null) {
             throw new NotFoundException("Wrong id");
         }
-        return filmStorage.getFilmById(id);
+        return filmById;
     }
 
     private void validate(Film film) {
