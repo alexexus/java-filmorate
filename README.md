@@ -1,3 +1,3 @@
 # java-filmorate
 Template repository for Filmorate project.
-![База данных](https://i.postimg.cc/wMTQ9tHL/filmorate.png)
+![База данных](https://imgur.com/TLQk80R.png)
