@@ -33,4 +33,6 @@ public class User {
     @Past
     @NotNull
     private LocalDate birthday;
+
+    private String status;
 }
