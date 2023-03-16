@@ -1,0 +1,11 @@
+INSERT INTO rating_MPA (rating_MPA_name) VALUES ('G');
+INSERT INTO rating_MPA (rating_MPA_name) VALUES ('PG');
+INSERT INTO rating_MPA (rating_MPA_name) VALUES ('PG-13');
+INSERT INTO rating_MPA (rating_MPA_name) VALUES ('R');
+INSERT INTO rating_MPA (rating_MPA_name) VALUES ('NC-17');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Комедия');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Драма');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Мультфильм');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Триллер');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Документальный');
+INSERT INTO GENRE (GENRE_NAME) VALUES ('Боевик');
