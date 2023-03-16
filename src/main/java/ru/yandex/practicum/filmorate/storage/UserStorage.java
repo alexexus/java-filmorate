@@ -8,11 +8,21 @@ public interface UserStorage {
 
     User addUser(User user);
 
-    void deleteUser(Integer id);
+    void deleteUser(long id);
 
     User updateUser(User user);
 
     List<User> getAllUsers();
 
-    User getUserById(Integer id);
+    User getUserById(long id);
+
+    void addFriend(long id, long otherId);
+
+    void deleteFriend(long id, long otherId);
+
+    List<User> getAllFriends(long id);
+
+    List<User> getCommonFriends(long id, long otherId);
+
+    boolean userNotExists(long id);
 }

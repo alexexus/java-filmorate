@@ -2,15 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,38 +20,36 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
-    public void addFriend(Integer id, Integer otherId) {
-        if (userStorage.getUserById(otherId) == null) {
-            throw new NotFoundException("Wrong id");
+    public void addFriend(long id, long otherId) {
+        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+            throw new NotFoundException("User not found");
         }
-        getUserById(id).getFriends().add(otherId);
-        getUserById(otherId).getFriends().add(id);
+        userStorage.addFriend(id, otherId);
     }
 
-    public void deleteFriend(Integer id, Integer otherId) {
-        if (userStorage.getUserById(otherId) == null) {
-            throw new NotFoundException("Wrong id");
+    public void deleteFriend(long id, long otherId) {
+        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+            throw new NotFoundException("User not found");
         }
-        getUserById(id).getFriends().remove(otherId);
-        getUserById(otherId).getFriends().remove(id);
+        userStorage.deleteFriend(id, otherId);
     }
 
-    public List<User> getAllFriends(Integer id) {
-        return getUserById(id).getFriends().stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+    public List<User> getAllFriends(long id) {
+        if (userStorage.userNotExists(id)) {
+            throw new NotFoundException("User not found");
+        }
+        return userStorage.getAllFriends(id);
     }
 
-    public List<User> getCommonFriends(Integer id, Integer otherId) {
-        List<Integer> userFriends = new ArrayList<>(getUserById(id).getFriends());
-        userFriends.retainAll(getUserById(otherId).getFriends());
-        return userFriends.stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+    public List<User> getCommonFriends(long id, long otherId) {
+        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+            throw new NotFoundException("User not found");
+        }
+        return userStorage.getCommonFriends(id, otherId);
     }
 
     public User addUser(User user) {
@@ -66,8 +63,8 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
-            throw new NotFoundException("Wrong id");
+        if (userStorage.userNotExists(user.getId())) {
+            throw new NotFoundException("User not found");
         }
         validate(user);
         if (user.getName() == null) {
@@ -77,21 +74,19 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public void deleteUser(Integer id) {
-        User userById = userStorage.getUserById(id);
-        if (userById == null) {
-            throw new NotFoundException("Wrong id");
+    public void deleteUser(long id) {
+        if (userStorage.userNotExists(id)) {
+            throw new NotFoundException("User not found");
         }
-        log.debug("User {} deleted", userById);
+        log.debug("User {} deleted", userStorage.getUserById(id));
         userStorage.deleteUser(id);
     }
 
-    public User getUserById(Integer id) {
-        User userById = userStorage.getUserById(id);
-        if (userById == null) {
-            throw new NotFoundException("Wrong id");
+    public User getUserById(long id) {
+        if (userStorage.userNotExists(id)) {
+            throw new NotFoundException("User not found");
         }
-        return userById;
+        return userStorage.getUserById(id);
     }
 
     public List<User> getAllUsers() {
