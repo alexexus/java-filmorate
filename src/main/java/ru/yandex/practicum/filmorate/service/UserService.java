@@ -16,7 +16,6 @@ import java.util.List;
 public class UserService {
 
     private int generatorId = 0;
-
     private final UserStorage userStorage;
 
     @Autowired
