@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,11 +13,11 @@ import java.util.List;
 
 @Component
 @Repository
-public class UserDbStorage implements UserStorage {
+public class UserDaoImpl implements UserDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    public UserDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -89,10 +89,10 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public boolean userNotExists(long id) {
+    public boolean userExists(long id) {
         String sqlQuery = "SELECT COUNT(*) FROM USERS WHERE USER_ID = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
-        return result != 1;
+        return result == 1;
     }
 
     private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {

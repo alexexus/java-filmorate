@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.dao;
+package ru.yandex.practicum.filmorate.dao.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -11,11 +11,11 @@ import java.util.List;
 
 @Component
 @Repository
-public class GenreDbStorage {
+public class GenreDaoImpl {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
+    public GenreDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -24,7 +24,7 @@ public class GenreDbStorage {
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
     }
 
-    public List<Genre> getAllGenre() {
+    public List<Genre> getAllGenres() {
         String sqlQuery = "SELECT * FROM GENRE";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }

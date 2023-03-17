@@ -8,10 +8,10 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
-import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
-import ru.yandex.practicum.filmorate.dao.MpaDbStorage;
-import ru.yandex.practicum.filmorate.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.dao.impl.FilmDaoImpl;
+import ru.yandex.practicum.filmorate.dao.impl.GenreDaoImpl;
+import ru.yandex.practicum.filmorate.dao.impl.MpaDaoImpl;
+import ru.yandex.practicum.filmorate.dao.impl.UserDaoImpl;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -28,10 +28,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FilmorateApplicationTests {
 
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmDbStorage;
-    private final GenreDbStorage genreDbStorage;
-    private final MpaDbStorage mpaDbStorage;
+    private final UserDaoImpl userStorage;
+    private final FilmDaoImpl filmDaoImpl;
+    private final GenreDaoImpl genreDaoImpl;
+    private final MpaDaoImpl mpaDaoImpl;
 
     @Test
     @Order(1)
@@ -121,13 +121,13 @@ class FilmorateApplicationTests {
     @Test
     @Order(9)
     public void testUserNotExists() {
-        assertThat(userStorage.userNotExists(999)).isTrue();
+        assertThat(userStorage.userExists(999)).isFalse();
     }
 
     @Test
     @Order(10)
     public void testAddFilm() {
-        filmDbStorage.addFilm(Film.builder()
+        filmDaoImpl.addFilm(Film.builder()
                 .id(1)
                 .name("name")
                 .description("description")
@@ -136,20 +136,20 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(1).name("G").build())
                 .genres(List.of(Genre.builder().id(1).name("Комедия").build()))
                 .build());
-        assertThat(filmDbStorage.getFilmById(1)).hasFieldOrPropertyWithValue("id", 1L);
+        assertThat(filmDaoImpl.getFilmById(1)).hasFieldOrPropertyWithValue("id", 1L);
     }
 
     @Test
     @Order(11)
     public void testDeleteFilm() {
-        filmDbStorage.deleteFilm(1);
-        assertThat(filmDbStorage.getAllFilms().isEmpty()).isTrue();
+        filmDaoImpl.deleteFilm(1);
+        assertThat(filmDaoImpl.getAllFilms().isEmpty()).isTrue();
     }
 
     @Test
     @Order(12)
     public void testUpdateFilm() {
-        filmDbStorage.addFilm(Film.builder()
+        filmDaoImpl.addFilm(Film.builder()
                 .id(2)
                 .name("name2")
                 .description("description2")
@@ -158,7 +158,7 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(2).name("PG").build())
                 .genres(List.of(Genre.builder().id(2).name("Драма").build()))
                 .build());
-        filmDbStorage.updateFilm(Film.builder()
+        filmDaoImpl.updateFilm(Film.builder()
                 .id(2)
                 .name("updateName2")
                 .description("description2")
@@ -167,25 +167,25 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(2).name("PG").build())
                 .genres(List.of(Genre.builder().id(2).name("Драма").build()))
                 .build());
-        assertThat(filmDbStorage.getFilmById(2)).hasFieldOrPropertyWithValue("name", "updateName2");
+        assertThat(filmDaoImpl.getFilmById(2)).hasFieldOrPropertyWithValue("name", "updateName2");
     }
 
     @Test
     @Order(13)
     public void testGetAllFilms() {
-        assertThat(filmDbStorage.getAllFilms().size() == 1).isTrue();
+        assertThat(filmDaoImpl.getAllFilms().size() == 1).isTrue();
     }
 
     @Test
     @Order(14)
     public void testGetFilmById() {
-        assertThat(filmDbStorage.getFilmById(2)).hasFieldOrPropertyWithValue("id", 2L);
+        assertThat(filmDaoImpl.getFilmById(2)).hasFieldOrPropertyWithValue("id", 2L);
     }
 
     @Test
     @Order(15)
     public void testAddLike() {
-        filmDbStorage.addFilm(Film.builder()
+        filmDaoImpl.addFilm(Film.builder()
                 .id(3)
                 .name("name3")
                 .description("description3")
@@ -194,69 +194,69 @@ class FilmorateApplicationTests {
                 .mpa(Mpa.builder().id(3).name("PG-13").build())
                 .genres(List.of(Genre.builder().id(3).name("Мультфильм").build()))
                 .build());
-        filmDbStorage.addLike(2, 3);
-        assertThat(filmDbStorage.getPopularFilms(10).get(0)).hasFieldOrPropertyWithValue("id", 2L);
+        filmDaoImpl.addLike(2, 3);
+        assertThat(filmDaoImpl.getPopularFilms(10).get(0)).hasFieldOrPropertyWithValue("id", 2L);
     }
 
     @Test
     @Order(16)
     public void testDeleteLike() {
-        filmDbStorage.deleteLike(2, 3);
-        assertThat(filmDbStorage.getPopularFilms(10).size() == 2).isTrue();
+        filmDaoImpl.deleteLike(2, 3);
+        assertThat(filmDaoImpl.getPopularFilms(10).size() == 2).isTrue();
     }
 
     @Test
     @Order(17)
     public void testGetPopularFilms() {
-        filmDbStorage.addLike(2, 3);
-        assertThat(filmDbStorage.getPopularFilms(10).get(0)).hasFieldOrPropertyWithValue("id", 2L);
+        filmDaoImpl.addLike(2, 3);
+        assertThat(filmDaoImpl.getPopularFilms(10).get(0)).hasFieldOrPropertyWithValue("id", 2L);
     }
 
     @Test
     @Order(18)
     public void testFilmNotExists() {
-        assertThat(filmDbStorage.filmNotExists(999)).isTrue();
+        assertThat(filmDaoImpl.filmExists(999)).isFalse();
     }
 
     @Test
     @Order(19)
     public void testGetGenreById() {
-        assertThat(genreDbStorage.getGenreById(1)).hasFieldOrPropertyWithValue("name", "Комедия");
+        assertThat(genreDaoImpl.getGenreById(1)).hasFieldOrPropertyWithValue("name", "Комедия");
     }
 
     @Test
     @Order(20)
     public void testGetAllGenres() {
-        assertThat(genreDbStorage.getAllGenre().get(5)).hasFieldOrPropertyWithValue("name", "Боевик");
+        assertThat(genreDaoImpl.getAllGenres().get(5)).hasFieldOrPropertyWithValue("name", "Боевик");
     }
 
     @Test
     @Order(21)
     public void testGetFilmGenres() {
-        assertThat(genreDbStorage.getFilmGenres(2).get(0)).hasFieldOrPropertyWithValue("name", "Драма");
+        assertThat(genreDaoImpl.getFilmGenres(2).get(0)).hasFieldOrPropertyWithValue("name", "Драма");
     }
 
     @Test
     @Order(22)
     public void testGenreNotExists() {
-        assertThat(genreDbStorage.genreNotExists(999)).isTrue();
+        assertThat(genreDaoImpl.genreNotExists(999)).isTrue();
     }
 
     @Test
     @Order(23)
     public void testGetMpaById() {
-        assertThat(mpaDbStorage.getMpaById(1)).hasFieldOrPropertyWithValue("name", "G");
+        assertThat(mpaDaoImpl.getMpaById(1)).hasFieldOrPropertyWithValue("name", "G");
     }
 
     @Test
     @Order(24)
     public void testGetAllMpa() {
-        assertThat(mpaDbStorage.getAllMpa().get(4)).hasFieldOrPropertyWithValue("name", "NC-17");
+        assertThat(mpaDaoImpl.getAllMpa().get(4)).hasFieldOrPropertyWithValue("name", "NC-17");
     }
 
     @Test
     @Order(25)
     public void testMpaNotExists() {
-        assertThat(mpaDbStorage.mpaNotExists(999)).isTrue();
+        assertThat(mpaDaoImpl.mpaNotExists(999)).isTrue();
     }
 }

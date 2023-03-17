@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
 
-public interface FilmStorage {
+public interface FilmDao {
 
     Film addFilm(Film film);
 
@@ -22,5 +22,5 @@ public interface FilmStorage {
 
     List<Film> getPopularFilms(long count);
 
-    boolean filmNotExists(long id);
+    boolean filmExists(long id);
 }

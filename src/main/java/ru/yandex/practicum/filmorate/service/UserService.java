@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.util.List;
 
@@ -16,39 +16,39 @@ import java.util.List;
 public class UserService {
 
     private int generatorId = 0;
-    private final UserStorage userStorage;
+    private final UserDao userDao;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(@Qualifier("userDaoImpl") UserDao userDao) {
+        this.userDao = userDao;
     }
 
     public void addFriend(long id, long otherId) {
-        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+        if (!userDao.userExists(id) || !userDao.userExists(otherId)) {
             throw new NotFoundException("User not found");
         }
-        userStorage.addFriend(id, otherId);
+        userDao.addFriend(id, otherId);
     }
 
     public void deleteFriend(long id, long otherId) {
-        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+        if (!userDao.userExists(id) || !userDao.userExists(otherId)) {
             throw new NotFoundException("User not found");
         }
-        userStorage.deleteFriend(id, otherId);
+        userDao.deleteFriend(id, otherId);
     }
 
     public List<User> getAllFriends(long id) {
-        if (userStorage.userNotExists(id)) {
+        if (!userDao.userExists(id)) {
             throw new NotFoundException("User not found");
         }
-        return userStorage.getAllFriends(id);
+        return userDao.getAllFriends(id);
     }
 
     public List<User> getCommonFriends(long id, long otherId) {
-        if (userStorage.userNotExists(id) || userStorage.userNotExists(otherId)) {
+        if (!userDao.userExists(id) || !userDao.userExists(otherId)) {
             throw new NotFoundException("User not found");
         }
-        return userStorage.getCommonFriends(id, otherId);
+        return userDao.getCommonFriends(id, otherId);
     }
 
     public User addUser(User user) {
@@ -58,11 +58,11 @@ public class UserService {
         }
         user.setId(++generatorId);
         log.debug("Added new user {}", user);
-        return userStorage.addUser(user);
+        return userDao.addUser(user);
     }
 
     public User updateUser(User user) {
-        if (userStorage.userNotExists(user.getId())) {
+        if (!userDao.userExists(user.getId())) {
             throw new NotFoundException("User not found");
         }
         validate(user);
@@ -70,26 +70,26 @@ public class UserService {
             user.setName(user.getLogin());
         }
         log.debug("User {} updated", user);
-        return userStorage.updateUser(user);
+        return userDao.updateUser(user);
     }
 
     public void deleteUser(long id) {
-        if (userStorage.userNotExists(id)) {
+        if (!userDao.userExists(id)) {
             throw new NotFoundException("User not found");
         }
-        log.debug("User {} deleted", userStorage.getUserById(id));
-        userStorage.deleteUser(id);
+        log.debug("User {} deleted", userDao.getUserById(id));
+        userDao.deleteUser(id);
     }
 
     public User getUserById(long id) {
-        if (userStorage.userNotExists(id)) {
+        if (!userDao.userExists(id)) {
             throw new NotFoundException("User not found");
         }
-        return userStorage.getUserById(id);
+        return userDao.getUserById(id);
     }
 
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userDao.getAllUsers();
     }
 
     private void validate(User user) {

@@ -28,7 +28,7 @@ public class GenreController {
 
     @GetMapping
     public List<Genre> getAllGenre() {
-        return genreService.getAllGenre();
+        return genreService.getAllGenres();
     }
 
 }

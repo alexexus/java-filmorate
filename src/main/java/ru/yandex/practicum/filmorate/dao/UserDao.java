@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.dao;
 
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
 
-public interface UserStorage {
+public interface UserDao {
 
     User addUser(User user);
 
@@ -24,5 +24,5 @@ public interface UserStorage {
 
     List<User> getCommonFriends(long id, long otherId);
 
-    boolean userNotExists(long id);
+    boolean userExists(long id);
 }

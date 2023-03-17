@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.GenreDbStorage;
+import ru.yandex.practicum.filmorate.dao.impl.GenreDaoImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -12,22 +12,22 @@ import java.util.List;
 @Service
 public class GenreService {
 
-    private final GenreDbStorage genreDbStorage;
+    private final GenreDaoImpl genreDaoImpl;
 
     @Autowired
-    public GenreService(@Qualifier("genreDbStorage") GenreDbStorage genreDbStorage) {
-        this.genreDbStorage = genreDbStorage;
+    public GenreService(@Qualifier("genreDaoImpl") GenreDaoImpl genreDaoImpl) {
+        this.genreDaoImpl = genreDaoImpl;
     }
 
     public Genre getGenreById(long id) {
-        if (genreDbStorage.genreNotExists(id)) {
+        if (genreDaoImpl.genreNotExists(id)) {
             throw new NotFoundException("Wrong id");
         }
-        return genreDbStorage.getGenreById(id);
+        return genreDaoImpl.getGenreById(id);
     }
 
-    public List<Genre> getAllGenre() {
-        return genreDbStorage.getAllGenre();
+    public List<Genre> getAllGenres() {
+        return genreDaoImpl.getAllGenres();
     }
 
 }
