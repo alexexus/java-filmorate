@@ -2,13 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.dao.FilmDao;
-import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,13 +16,11 @@ import java.util.List;
 @Service
 public class FilmService {
 
-    private int generatorId = 0;
-
     private final FilmDao filmDao;
     private final UserDao userDao;
 
     @Autowired
-    public FilmService(@Qualifier("filmDaoImpl") FilmDao filmDao, @Qualifier("userDaoImpl") UserDao userDao) {
+    public FilmService(FilmDao filmDao, UserDao userDao) {
         this.filmDao = filmDao;
         this.userDao = userDao;
     }
@@ -52,7 +49,6 @@ public class FilmService {
 
     public Film addFilm(Film film) {
         validate(film);
-        film.setId(++generatorId);
         log.debug("Added new film {}", film);
         return filmDao.addFilm(film);
     }

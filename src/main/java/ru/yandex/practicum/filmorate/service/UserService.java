@@ -2,12 +2,11 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.UserDao;
 
 import java.util.List;
 
@@ -15,11 +14,10 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private int generatorId = 0;
     private final UserDao userDao;
 
     @Autowired
-    public UserService(@Qualifier("userDaoImpl") UserDao userDao) {
+    public UserService(UserDao userDao) {
         this.userDao = userDao;
     }
 
@@ -56,7 +54,6 @@ public class UserService {
         if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        user.setId(++generatorId);
         log.debug("Added new user {}", user);
         return userDao.addUser(user);
     }

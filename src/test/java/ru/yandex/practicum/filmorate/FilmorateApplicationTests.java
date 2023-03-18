@@ -239,7 +239,7 @@ class FilmorateApplicationTests {
     @Test
     @Order(22)
     public void testGenreNotExists() {
-        assertThat(genreDaoImpl.genreNotExists(999)).isTrue();
+        assertThat(genreDaoImpl.genreExists(999)).isFalse();
     }
 
     @Test
@@ -257,6 +257,6 @@ class FilmorateApplicationTests {
     @Test
     @Order(25)
     public void testMpaNotExists() {
-        assertThat(mpaDaoImpl.mpaNotExists(999)).isTrue();
+        assertThat(mpaDaoImpl.mpaExists(999)).isFalse();
     }
 }

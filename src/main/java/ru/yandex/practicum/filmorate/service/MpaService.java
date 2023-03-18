@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.impl.MpaDaoImpl;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -15,12 +14,12 @@ public class MpaService {
     private final MpaDaoImpl mpaDaoImpl;
 
     @Autowired
-    public MpaService(@Qualifier("mpaDaoImpl") MpaDaoImpl mpaDaoImpl) {
+    public MpaService(MpaDaoImpl mpaDaoImpl) {
         this.mpaDaoImpl = mpaDaoImpl;
     }
 
     public Mpa getMpaById(long id) {
-        if (mpaDaoImpl.mpaNotExists(id)) {
+        if (!mpaDaoImpl.mpaExists(id)) {
             throw new NotFoundException("Wrong id");
         }
         return mpaDaoImpl.getMpaById(id);

@@ -55,4 +55,4 @@ ALTER TABLE friends ADD FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELE
 
 ALTER TABLE friends ADD FOREIGN KEY (friend_id) REFERENCES users (user_id);
 
-ALTER TABLE films ADD FOREIGN KEY (rating_mpa_id) REFERENCES rating_MPA (rating_mpa_id);
+ALTER TABLE films ADD FOREIGN KEY (rating_mpa_id) REFERENCES rating_mpa (rating_mpa_id);
