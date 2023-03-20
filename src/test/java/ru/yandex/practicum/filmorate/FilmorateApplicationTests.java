@@ -18,7 +18,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -134,7 +134,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2000, 12, 11))
                 .duration(111)
                 .mpa(Mpa.builder().id(1).name("G").build())
-                .genres(List.of(Genre.builder().id(1).name("Комедия").build()))
+                .genres(Set.of(Genre.builder().id(1).name("Комедия").build()))
                 .build());
         assertThat(filmDaoImpl.getFilmById(1)).hasFieldOrPropertyWithValue("id", 1L);
     }
@@ -156,7 +156,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2000, 12, 12))
                 .duration(112)
                 .mpa(Mpa.builder().id(2).name("PG").build())
-                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .genres(Set.of(Genre.builder().id(2).name("Драма").build()))
                 .build());
         filmDaoImpl.updateFilm(Film.builder()
                 .id(2)
@@ -165,7 +165,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2000, 12, 12))
                 .duration(112)
                 .mpa(Mpa.builder().id(2).name("PG").build())
-                .genres(List.of(Genre.builder().id(2).name("Драма").build()))
+                .genres(Set.of(Genre.builder().id(2).name("Драма").build()))
                 .build());
         assertThat(filmDaoImpl.getFilmById(2)).hasFieldOrPropertyWithValue("name", "updateName2");
     }
@@ -192,7 +192,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2000, 12, 13))
                 .duration(113)
                 .mpa(Mpa.builder().id(3).name("PG-13").build())
-                .genres(List.of(Genre.builder().id(3).name("Мультфильм").build()))
+                .genres(Set.of(Genre.builder().id(3).name("Мультфильм").build()))
                 .build());
         filmDaoImpl.addLike(2, 3);
         assertThat(filmDaoImpl.getPopularFilms(10).get(0)).hasFieldOrPropertyWithValue("id", 2L);
@@ -233,7 +233,7 @@ class FilmorateApplicationTests {
     @Test
     @Order(21)
     public void testGetFilmGenres() {
-        assertThat(genreDaoImpl.getFilmGenres(2).get(0)).hasFieldOrPropertyWithValue("name", "Драма");
+        assertThat(genreDaoImpl.getGenresByFilmId(2).get(0)).hasFieldOrPropertyWithValue("name", "Драма");
     }
 
     @Test

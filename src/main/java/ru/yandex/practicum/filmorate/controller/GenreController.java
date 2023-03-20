@@ -30,5 +30,4 @@ public class GenreController {
     public List<Genre> getAllGenre() {
         return genreService.getAllGenres();
     }
-
 }

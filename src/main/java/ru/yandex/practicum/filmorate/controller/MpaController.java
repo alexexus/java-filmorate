@@ -30,5 +30,4 @@ public class MpaController {
     public List<Mpa> getAllMpa() {
         return mpaService.getAllMpa();
     }
-
 }

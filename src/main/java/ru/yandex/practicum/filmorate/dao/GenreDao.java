@@ -10,7 +10,7 @@ public interface GenreDao {
 
     List<Genre> getAllGenres();
 
-    List<Genre> getFilmGenres(long filmId);
+    List<Genre> getGenresByFilmId(long filmId);
 
     boolean genreExists(long id);
 }
