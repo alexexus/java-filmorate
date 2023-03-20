@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -11,12 +12,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Data
+@Builder
 public class Film {
 
-    @Positive
-    private Integer id;
-
-    private Set<Integer> likes = new TreeSet<>();
+    private long id;
 
     @NotNull
     @NotBlank
@@ -28,10 +27,9 @@ public class Film {
     private LocalDate releaseDate;
 
     @Positive
-        private int duration;
+    private int duration;
 
-    private String genre;
+    private Mpa mpa;
 
-    private String rating;
-
+    private Set<Genre> genres;
 }

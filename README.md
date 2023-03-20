@@ -1,6 +1,6 @@
 ## База данных для проекта filmorate.
 
-![База данных](https://imgur.com/lsDt8IY.png)
+![База данных](https://imgur.com/BnBpDHq.png)
 
 ## Примеры запросов:
 

@@ -3,87 +3,78 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FilmService {
 
-    private int generatorId = 0;
-
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final FilmDao filmDao;
+    private final UserDao userDao;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public FilmService(FilmDao filmDao, UserDao userDao) {
+        this.filmDao = filmDao;
+        this.userDao = userDao;
     }
 
-    public void addLike(Integer id, Integer userId) {
-        if (userStorage.getUserById(userId) == null) {
+    public void addLike(long id, long userId) {
+        if (!filmDao.filmExists(id) || !userDao.userExists(userId)) {
             throw new NotFoundException("Wrong id");
         }
-        getFilmById(id).getLikes().add(userId);
+        filmDao.addLike(id, userId);
     }
 
-    public void deleteLike(Integer id, Integer userId) {
-        if (userStorage.getUserById(userId) == null) {
+    public void deleteLike(long id, long userId) {
+        if (!filmDao.filmExists(id) || !userDao.userExists(userId)) {
             throw new NotFoundException("Wrong id");
         }
-        getFilmById(id).getLikes().remove(userId);
+        filmDao.deleteLike(id, userId);
     }
 
-    public List<Film> getPopularFilms(Integer count) {
-        return getAllFilms().stream()
-                .sorted((o1, o2) -> o2.getLikes().size() - o1.getLikes().size())
-                .limit(count)
-                .collect(Collectors.toList());
+    public List<Film> getPopularFilms(long count) {
+        return filmDao.getPopularFilms(count);
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmDao.getAllFilms();
     }
 
     public Film addFilm(Film film) {
         validate(film);
-        film.setId(++generatorId);
         log.debug("Added new film {}", film);
-        return filmStorage.addFilm(film);
+        return filmDao.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        if (filmStorage.getFilmById(film.getId()) == null) {
-            throw new NotFoundException("Wrong id");
+        if (!filmDao.filmExists(film.getId())) {
+            throw new NotFoundException("Film not found");
         }
         validate(film);
         log.debug("Film {} updated", film);
-        return filmStorage.updateFilm(film);
+        return filmDao.updateFilm(film);
     }
 
-    public void deleteFilm(Integer id) {
-        Film filmById = filmStorage.getFilmById(id);
-        if (filmById == null) {
-            throw new NotFoundException("Wrong id");
+    public void deleteFilm(long id) {
+        if (!filmDao.filmExists(id)) {
+            throw new NotFoundException("Film not found");
         }
-        log.debug("Film {} deleted", filmById);
-        filmStorage.deleteFilm(id);
+        log.debug("Film {} deleted", filmDao.getFilmById(id));
+        filmDao.deleteFilm(id);
     }
 
-    public Film getFilmById(Integer id) {
-        Film filmById = filmStorage.getFilmById(id);
-        if (filmById == null) {
-            throw new NotFoundException("Wrong id");
+    public Film getFilmById(long id) {
+        if (!filmDao.filmExists(id)) {
+            throw new NotFoundException("Film not found");
         }
-        return filmById;
+        return filmDao.getFilmById(id);
     }
 
     private void validate(Film film) {
