@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.DirectorDao;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
 import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -19,10 +20,13 @@ public class FilmService {
     private final FilmDao filmDao;
     private final UserDao userDao;
 
+    private final DirectorDao directorDao;
+
     @Autowired
-    public FilmService(FilmDao filmDao, UserDao userDao) {
+    public FilmService(FilmDao filmDao, UserDao userDao, DirectorDao directorDao) {
         this.filmDao = filmDao;
         this.userDao = userDao;
+        this.directorDao = directorDao;
     }
 
     public void addLike(long id, long userId) {
@@ -75,6 +79,13 @@ public class FilmService {
             throw new NotFoundException("Film not found");
         }
         return filmDao.getFilmById(id);
+    }
+
+    public List<Film> getSortedFilmsByDirId(long directorId, String sort) {
+        if (!directorDao.directorExists(directorId)) {
+            throw new NotFoundException("Director not found");
+        }
+        return filmDao.getSortedFilmsByDirId(directorId, sort);
     }
 
     private void validate(Film film) {

@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -48,11 +49,8 @@ public class FilmDaoImpl implements FilmDao {
         Long filmId = generatedKeyHolder.getKey().longValue();
         film.setId(filmId);
         addGenres(filmId, film.getGenres());
-        if (film.getGenres() != null) {
-            film.setGenres(film.getGenres().stream()
-                    .sorted((g1, g2) -> (int) (g1.getId() - g2.getId()))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
-        }
+        checkGenres(film);
+        addDirectors(filmId, film.getDirectors());
         return film;
     }
 
@@ -75,11 +73,8 @@ public class FilmDaoImpl implements FilmDao {
                 film.getMpa().getId(),
                 film.getId());
         addGenres(film.getId(), film.getGenres());
-        if (film.getGenres() != null) {
-            film.setGenres(film.getGenres().stream()
-                    .sorted((g1, g2) -> (int) (g1.getId() - g2.getId()))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
-        }
+        checkGenres(film);
+        addDirectors(film.getId(), film.getDirectors());
         return film;
     }
 
@@ -120,6 +115,24 @@ public class FilmDaoImpl implements FilmDao {
     }
 
     @Override
+    public List<Film> getSortedFilmsByDirId(long directorId, String sort) {
+        String sqlQuery;
+        if (sort.equals("likes")) {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME, COUNT(L.FILM_ID) FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "LEFT JOIN LIKES L on F.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ?" +
+                    "GROUP BY F.FILM_ID ORDER BY COUNT(L.FILM_ID) DESC";
+        } else {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ?" +
+                    "GROUP BY F.RELEASE_DATE ORDER BY F.RELEASE_DATE";
+        }
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorId);
+    }
+
+    @Override
     public boolean filmExists(long id) {
         String sqlQuery = "SELECT COUNT(*) FROM FILMS WHERE FILM_ID = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
@@ -151,10 +164,50 @@ public class FilmDaoImpl implements FilmDao {
                 });
     }
 
+    private void addDirectors(long filmId, Set<Director> directors) {
+        if (directors == null || directors.isEmpty()) {
+            String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
+            jdbcTemplate.update(sqlQuery, filmId);
+            return;
+        }
+        List<Director> directorListWithoutDuplicate = new ArrayList<>(directors);
+        directorListWithoutDuplicate.sort((g1, g2) -> (int) (g1.getId() - g2.getId()));
+        String sqlQuery = "DELETE FROM FILM_DIRECTOR WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+        jdbcTemplate.batchUpdate("INSERT INTO FILM_DIRECTOR (DIRECTOR_ID, FILM_ID) VALUES (?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, directorListWithoutDuplicate.get(i).getId());
+                        ps.setLong(2, filmId);
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return directorListWithoutDuplicate.size();
+                    }
+                });
+    }
+
     private Set<Genre> getGenresByFilmId(long filmId) {
         String sqlQuery = "SELECT * FROM FILM_GENRE FG " +
                 "LEFT JOIN GENRE G on FG.GENRE_ID = G.GENRE_ID WHERE FG.FILM_ID = ?";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId));
+    }
+
+    private Set<Director> getDirectorsByFilmId(long filmId) {
+        String sqlQuery = "SELECT * FROM FILM_DIRECTOR FD " +
+                "LEFT JOIN DIRECTOR D on FD.DIRECTOR_ID = D.DIRECTOR_ID WHERE FD.FILM_ID = ?";
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::mapRowToDirector, filmId));
+    }
+
+    private void checkGenres(Film film) {
+        if (film.getGenres() == null) {
+            film.setGenres(new HashSet<>());
+        }
+        film.setGenres(film.getGenres().stream()
+                .sorted((g1, g2) -> (int) (g1.getId() - g2.getId()))
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
@@ -169,6 +222,7 @@ public class FilmDaoImpl implements FilmDao {
                         .name(rs.getString("RATING_MPA_NAME"))
                         .build())
                 .genres(getGenresByFilmId(rs.getLong("FILM_ID")))
+                .directors(getDirectorsByFilmId(rs.getLong("FILM_ID")))
                 .build();
     }
 
@@ -176,6 +230,13 @@ public class FilmDaoImpl implements FilmDao {
         return Genre.builder()
                 .id(rs.getLong("GENRE_ID"))
                 .name(rs.getString("GENRE_NAME"))
+                .build();
+    }
+
+    private Director mapRowToDirector(ResultSet rs, int rowNum) throws SQLException {
+        return Director.builder()
+                .id(rs.getLong("DIRECTOR_ID"))
+                .name(rs.getString("DIRECTOR_NAME"))
                 .build();
     }
 }

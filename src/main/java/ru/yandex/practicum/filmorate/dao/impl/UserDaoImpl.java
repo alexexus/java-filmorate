@@ -72,7 +72,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void addFriend(long id, long otherId) {
-        String sqlQuery = "INSERT INTO FRIENDS (USER_ID, FRIEND_ID) VALUES (?, ?)";
+        String sqlQuery = "MERGE INTO FRIENDS (USER_ID, FRIEND_ID) VALUES (?, ?)";
         jdbcTemplate.update(sqlQuery, id, otherId);
     }
 

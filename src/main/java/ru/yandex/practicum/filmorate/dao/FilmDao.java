@@ -22,5 +22,7 @@ public interface FilmDao {
 
     List<Film> getPopularFilms(long count);
 
+    List<Film> getSortedFilmsByDirId(long directorId, String sort);
+
     boolean filmExists(long id);
 }
