@@ -88,6 +88,10 @@ public class FilmService {
         return filmDao.getSortedFilmsByDirId(directorId, sort);
     }
 
+    public List<Film> getSortedFilmByQuery(String query, String by) {
+        return filmDao.getSortedFilmByQuery(query, by);
+    }
+
     private void validate(Film film) {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             throw new ValidationException("Release date - no earlier than December 28, 1895");

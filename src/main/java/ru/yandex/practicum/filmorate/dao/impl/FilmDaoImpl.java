@@ -121,15 +121,52 @@ public class FilmDaoImpl implements FilmDao {
             sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME, COUNT(L.FILM_ID) FROM FILMS F " +
                     "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
                     "LEFT JOIN LIKES L on F.FILM_ID = L.FILM_ID " +
-                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ?" +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ? " +
                     "GROUP BY F.FILM_ID ORDER BY COUNT(L.FILM_ID) DESC";
         } else {
             sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
                     "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
-                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ?" +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID WHERE FD.DIRECTOR_ID = ? " +
                     "GROUP BY F.RELEASE_DATE ORDER BY F.RELEASE_DATE";
         }
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> getSortedFilmByQuery(String query, String by) {
+        String sqlQuery = "";
+        query = "%" + query + "%";
+        if (by.equals("director")) {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID " +
+                    "LEFT JOIN DIRECTOR D on D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                    "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
+                    "GROUP BY D.DIRECTOR_NAME ORDER BY D.DIRECTOR_NAME";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
+        } else if (by.equals("title")) {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "WHERE LOWER(F.NAME) LIKE LOWER(?) " +
+                    "GROUP BY F.NAME ORDER BY F.NAME";
+            return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
+        }
+        if (by.equals("director,title")) {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID " +
+                    "LEFT JOIN DIRECTOR D on D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                    "WHERE LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) OR LOWER(F.NAME) LIKE LOWER(?) " +
+                    "GROUP BY D.DIRECTOR_NAME, F.NAME ORDER BY D.DIRECTOR_NAME, F.NAME";
+        } else if (by.equals("title,director")) {
+            sqlQuery = "SELECT F.*, RM.RATING_MPA_NAME FROM FILMS F " +
+                    "LEFT JOIN RATING_MPA RM ON F.RATING_MPA_ID = RM.RATING_MPA_ID " +
+                    "LEFT JOIN FILM_DIRECTOR FD on F.FILM_ID = FD.FILM_ID " +
+                    "LEFT JOIN DIRECTOR D on D.DIRECTOR_ID = FD.DIRECTOR_ID " +
+                    "WHERE LOWER(F.NAME) LIKE LOWER(?) OR LOWER(D.DIRECTOR_NAME) LIKE LOWER(?) " +
+                    "GROUP BY F.NAME, D.DIRECTOR_NAME ORDER BY F.NAME DESC, D.DIRECTOR_NAME";
+        }
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query, query);
     }
 
     @Override
